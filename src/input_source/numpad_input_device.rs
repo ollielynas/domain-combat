@@ -10,47 +10,54 @@ pub struct NumpadInputDevice {
 }
 
 
+pub fn get_all_numpads() -> Vec<Box<dyn InputDevice>> {
+    return vec![
+        Box::new(NumpadInputDevice {
+            device_data: InputDeviceData::default(),
+        })
+    ]
+}
+
 
 impl InputDevice for NumpadInputDevice {
+
+    fn get_name(&mut self) -> String {
+        "Numpad".to_string()
+    }
     
     fn get_input_device_data(&mut self) -> &mut InputDeviceData {
         return &mut self.device_data;
     }
 
     fn should_begin_jump(&mut self) -> bool {
-        return is_key_pressed(macroquad::input::KeyCode::Zero);
+        
+        return is_key_pressed(macroquad::input::KeyCode::Kp0);
+    }
+
+    fn get_id(&self) -> u64 {
+        return 0;
     }
 
 
 
-    fn detect_and_return_all() -> Vec<Box<Self>> {
-        vec![
-            Box::new(NumpadInputDevice { 
-                device_data: InputDeviceData::default()
-            })
-        ]
-    }
 
 
     
 
     
 
-    fn get_toggle_enable_text() -> String {
-        return "Press Spacebar to enable/disable".to_owned();
-    }
+    
     
     fn get_current_direction_left_right(&mut self) -> super::input_device::InputDirectionLeftRight {
-        if is_key_pressed(macroquad::input::KeyCode::A) {
+        
+        if is_key_down(macroquad::input::KeyCode::Kp5) && is_key_down(macroquad::input::KeyCode::KpAdd) {
+            return InputDirectionLeftRight::Neutral;
+        }
+
+        if is_key_down(macroquad::input::KeyCode::Kp5) {
             return InputDirectionLeftRight::Left;
         }
-        if is_key_pressed(macroquad::input::KeyCode::D) {
-            return InputDirectionLeftRight::Right;
-        }
-        if is_key_down(macroquad::input::KeyCode::A) {
-            return InputDirectionLeftRight::Left;
-        }
-        if is_key_down(macroquad::input::KeyCode::D) {
+        if is_key_down(macroquad::input::KeyCode::KpAdd) {
             return InputDirectionLeftRight::Right;
         }
 
@@ -58,16 +65,16 @@ impl InputDevice for NumpadInputDevice {
     }
     
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown {
-        if is_key_pressed(macroquad::input::KeyCode::W) {
+        
+
+        if is_key_down(macroquad::input::KeyCode::Kp9) && is_key_down(macroquad::input::KeyCode::Kp6) {
+            return InputDirectionUpDown::Neutral;
+        }
+
+        if is_key_down(macroquad::input::KeyCode::Kp9) {
             return InputDirectionUpDown::Up;
         }
-        if is_key_pressed(macroquad::input::KeyCode::S) {
-            return InputDirectionUpDown::Down;
-        }
-        if is_key_down(macroquad::input::KeyCode::W) {
-            return InputDirectionUpDown::Up;
-        }
-        if is_key_down(macroquad::input::KeyCode::S) {
+        if is_key_down(macroquad::input::KeyCode::Kp6) {
             return InputDirectionUpDown::Down;
         }
 
@@ -75,14 +82,41 @@ impl InputDevice for NumpadInputDevice {
     }
     
     fn should_begin_dash(&mut self) -> bool {
-        todo!()
+        return is_key_pressed(macroquad::input::KeyCode::Kp7);
     }
     
     fn should_begin_short_attack(&mut self) -> bool {
-        todo!()
+        return is_key_pressed(macroquad::input::KeyCode::Kp1);
     }
     
     fn should_begin_long_attack(&mut self) -> bool {
-        todo!()
+        return is_key_pressed(macroquad::input::KeyCode::Kp4);
     }
+    
+    fn get_fast_attack_keybind(&mut self) -> String {
+        return "Numpad 1".to_string();
+    }
+    fn get_strong_attack_keybind(&mut self) -> String {
+        return "Numpad 4".to_string();
+    }
+    fn get_jump_keybind(&mut self) -> String {
+        return "Numpad 0".to_string();
+    }
+    
+    fn get_left_keybind(&mut self) -> String {
+        return "Numpad 5".to_string();
+    }
+    
+    fn get_right_keybind(&mut self) -> String {
+        return "Numpad Plus".to_string();
+    }
+    
+    fn get_up_keybind(&mut self) -> String {
+        return "Numpad 9".to_string();
+    }
+    
+    fn get_down_keybind(&mut self) -> String {
+        return "Numpad 6".to_string();
+    }
+    
 }
