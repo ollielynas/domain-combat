@@ -16,7 +16,7 @@ impl Scene {
                 input_select.render();
             },
             Scene::CharacterSelect(char_select) => {
-                
+                char_select.render();
             },
             Scene::MatchScene(match_state) => {
 

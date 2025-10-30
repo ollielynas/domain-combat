@@ -22,7 +22,7 @@ impl InputSelect {
         }
 
         for input in &mut self.input_devices {
-            if input.is_enabled() && input.is_ready_to_play() {
+            if input.is_enabled() && !input.is_ready_to_play() {
                 all_ready = false;
             }
         }
@@ -48,7 +48,7 @@ impl InputSelect {
             self.update_timer = 5.0;
             update_inputs_devices(&mut self.input_devices);
         }
-
+        let mut player_index = 0;
         for (i, input_device) in self.input_devices.iter_mut().enumerate() {
             input_device.as_mut().update_enabled_toggle();
             input_device.as_mut().update_start_game_toggle();
@@ -56,6 +56,11 @@ impl InputSelect {
             let enable_text = input_device.as_mut().enable_controller_instruction_text();
             let start_text = input_device.as_mut().start_game_instruction_text();
             let name = input_device.as_mut().get_name();
+            
+            if input_device.is_enabled() {
+                player_index += 1;
+            }
+            
             draw_text(
                 &format!(
                     "{i}.) {name}: {enable_text}, {start_text}, enabled:{} ready to start:{}",
@@ -63,10 +68,22 @@ impl InputSelect {
                     input_device.as_mut().is_ready_to_play()
                 ),
                 10.0,
-                i as f32 * 20.0+30.0,
+                i as f32 * 40.0+30.0,
                 15.0,
                 BLACK,
             );
+            if input_device.is_enabled() {
+            draw_text(
+                &format!(
+                    "player: {player_index}",
+                    
+                ),
+                10.0,
+                i as f32 * 40.0+50.0,
+                15.0,
+                BLACK,
+            );
+        }
         }
     }
 }

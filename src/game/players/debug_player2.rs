@@ -16,4 +16,9 @@ impl Player for DebugPlayer2 {
     fn render_sprite_at_pos(&mut self, x: f32, y:f32, scale:f32) {
         draw_rectangle(x, y, 10.0*scale, 20.0*scale, RED);
     }
+
+
+    fn get_name(&mut self) -> String {
+        "debug char 2".to_string()
+    }
 }
