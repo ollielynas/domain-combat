@@ -1,9 +1,11 @@
-use crate::scenes::input_select::InputSelect;
+use crate::{game::game_state::MatchState, scenes::{char_select::{self, CharSelectState}, input_select::InputSelect}};
 
 
 
 pub enum Scene {
-    InputSelectScene(InputSelect)
+    InputSelectScene(InputSelect),
+    CharacterSelect(CharSelectState),
+    MatchScene(MatchState),
 }
 
 
@@ -13,10 +15,26 @@ impl Scene {
             Scene::InputSelectScene(input_select) => {
                 input_select.render();
             },
+            Scene::CharacterSelect(char_select) => {
+                
+            },
+            Scene::MatchScene(match_state) => {
+
+            },
         }
     }
 
     pub fn change_scene(&mut self) -> Option<Scene> {
-        return None;
+        match self {
+            Scene::InputSelectScene(input_select) => {
+                return input_select.switch_scene();
+            },
+            Scene::CharacterSelect(char_select) => {
+                return None;
+            },
+            Scene::MatchScene(match_state) => {
+                return None;
+            },
+        }
     }
 }

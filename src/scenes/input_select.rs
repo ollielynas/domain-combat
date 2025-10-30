@@ -1,8 +1,10 @@
-use std::default;
 use macroquad::prelude::*;
 use macroquad::{text::draw_text, time::get_frame_time};
 
+use crate::input_source::dummy_input_device::dummy_input;
 use crate::input_source::input_device::{InputDevice, update_inputs_devices};
+use crate::scenes::char_select::CharSelectState;
+use crate::scenes::scenes::Scene;
 
 pub struct InputSelect {
     input_devices: Vec<Box<dyn InputDevice>>,
@@ -10,6 +12,36 @@ pub struct InputSelect {
 }
 
 impl InputSelect {
+
+    pub fn switch_scene(&mut self) -> Option<Scene> {
+        let mut all_ready = false;
+        for input in &mut self.input_devices {
+            if input.is_enabled() {
+                all_ready = true;
+            }
+        }
+
+        for input in &mut self.input_devices {
+            if input.is_enabled() && input.is_ready_to_play() {
+                all_ready = false;
+            }
+        }
+
+
+        if all_ready {
+            let mut new_device_array = vec![];
+            while self.input_devices.len() > 0 {
+                new_device_array.push(self.input_devices.pop().unwrap_or(dummy_input()));
+            }
+            return Some(Scene::CharacterSelect(
+                CharSelectState::new(new_device_array)
+            ));
+        }else {
+            return None;
+        }
+    }
+
+
     pub fn render(&mut self) {
         self.update_timer -= get_frame_time();
         if self.update_timer <= 0.0 {

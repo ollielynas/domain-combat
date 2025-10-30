@@ -1,4 +1,4 @@
-use macroquad::input::{is_key_down, is_key_pressed};
+use macroquad::input::{KeyCode, is_key_down, is_key_pressed};
 
 use crate::input_source::input_device::{InputDevice, InputDeviceData, InputDirectionLeftRight, InputDirectionUpDown};
 
@@ -31,7 +31,7 @@ impl InputDevice for NumpadInputDevice {
 
     fn should_begin_jump(&mut self) -> bool {
         
-        return is_key_pressed(macroquad::input::KeyCode::Kp0);
+        return is_key_pressed(KeyCode::Kp0);
     }
 
     fn get_id(&self) -> u64 {
@@ -39,25 +39,16 @@ impl InputDevice for NumpadInputDevice {
     }
 
 
-
-
-
-    
-
-    
-
-    
-    
     fn get_current_direction_left_right(&mut self) -> super::input_device::InputDirectionLeftRight {
         
-        if is_key_down(macroquad::input::KeyCode::Kp5) && is_key_down(macroquad::input::KeyCode::KpAdd) {
+        if is_key_down(KeyCode::Kp5) && is_key_down(KeyCode::KpAdd) {
             return InputDirectionLeftRight::Neutral;
         }
 
-        if is_key_down(macroquad::input::KeyCode::Kp5) {
+        if is_key_down(KeyCode::Kp5) {
             return InputDirectionLeftRight::Left;
         }
-        if is_key_down(macroquad::input::KeyCode::KpAdd) {
+        if is_key_down(KeyCode::KpAdd) {
             return InputDirectionLeftRight::Right;
         }
 
@@ -67,14 +58,14 @@ impl InputDevice for NumpadInputDevice {
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown {
         
 
-        if is_key_down(macroquad::input::KeyCode::Kp9) && is_key_down(macroquad::input::KeyCode::Kp6) {
+        if is_key_down(KeyCode::Kp9) && is_key_down(KeyCode::Kp6) {
             return InputDirectionUpDown::Neutral;
         }
 
-        if is_key_down(macroquad::input::KeyCode::Kp9) {
+        if is_key_down(KeyCode::Kp9) {
             return InputDirectionUpDown::Up;
         }
-        if is_key_down(macroquad::input::KeyCode::Kp6) {
+        if is_key_down(KeyCode::Kp6) {
             return InputDirectionUpDown::Down;
         }
 
@@ -82,15 +73,15 @@ impl InputDevice for NumpadInputDevice {
     }
     
     fn should_begin_dash(&mut self) -> bool {
-        return is_key_pressed(macroquad::input::KeyCode::Kp7);
+        return is_key_pressed(KeyCode::Kp7);
     }
     
     fn should_begin_short_attack(&mut self) -> bool {
-        return is_key_pressed(macroquad::input::KeyCode::Kp1);
+        return is_key_pressed(KeyCode::Kp1);
     }
     
     fn should_begin_long_attack(&mut self) -> bool {
-        return is_key_pressed(macroquad::input::KeyCode::Kp4);
+        return is_key_pressed(KeyCode::Kp4);
     }
     
     fn get_fast_attack_keybind(&mut self) -> String {
@@ -117,6 +108,14 @@ impl InputDevice for NumpadInputDevice {
     
     fn get_down_keybind(&mut self) -> String {
         return "Numpad 6".to_string();
+    }
+    
+    fn should_begin_move_right(&mut self) -> bool {
+        is_key_pressed(KeyCode::KpAdd)
+    }
+    
+    fn should_begin_move_left(&mut self) -> bool {
+        is_key_pressed(KeyCode::Kp5)
     }
     
 }

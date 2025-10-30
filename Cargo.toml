@@ -5,3 +5,5 @@ edition = "2024"
 
 [dependencies]
 macroquad = "0.4.14"
+# TODO: Replace the * by the latest version number.
+rapier2d = { version = "*", features = [ "simd-stable" ] }

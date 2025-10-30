@@ -72,6 +72,9 @@ pub trait InputDevice {
     fn get_current_direction_left_right(&mut self) -> InputDirectionLeftRight;
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown;
 
+    fn should_begin_move_right(&mut self) -> bool;
+    fn should_begin_move_left(&mut self) -> bool;
+    
     fn should_begin_dash(&mut self) -> bool;
     fn should_begin_short_attack(&mut self) -> bool;
     fn should_begin_long_attack(&mut self) -> bool;
