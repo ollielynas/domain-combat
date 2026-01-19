@@ -1,9 +1,15 @@
+use std::mem::swap;
+
 use crate::{
     game::{
         player::Player,
         players::player_constructor::{self, PlayerConstructor},
     },
-    input_source::{dummy_input_device::dummy_input, input_device::InputDevice}, scenes::scenes::Scene,
+    input_source::{dummy_input_device::dummy_input, input_device::InputDevice},
+    scenes::{
+        keybind_info::{self, KeyBindInfoState},
+        scenes::Scene,
+    },
 };
 
 pub struct CharSelectState {
@@ -31,20 +37,19 @@ impl CharSelectState {
             }
         }
 
-
         if let Some(player_constructor) = &mut self.player_constructor {
             if let Some(new_player) = player_constructor.construct_player_if_ready() {
                 self.players.push(new_player);
                 self.player_constructor = None;
             }
         }
-
     }
-
-
+    // gets called every frame and returns if no input devices are left
     pub fn switch_scene(&mut self) -> Option<Scene> {
-        if self.input_devices.len() == 0 {
-            // return Scene::
+        if self.input_devices.len() == 0 && self.player_constructor.is_none() {
+            let mut kb_info = KeyBindInfoState::new(vec![]);
+            swap(kb_info.get_players_mut(), &mut self.players);
+            return Some(Scene::KeybindInfoScene(kb_info));
         }
         return None;
     }

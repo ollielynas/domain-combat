@@ -46,10 +46,9 @@ impl PlayerConstructor {
             let mut player = self.char_options.remove(self.selected_char_index);
             let mut new_player_data =
                 UniversalPlayerData::new(dummy_input(), format!("Player {}", self.player_index));
-            
+
             swap(&mut new_player_data.input_device, &mut self.input_device);
             swap(player.get_player_data(), &mut new_player_data);
-
 
             return Some(player);
         }
@@ -65,11 +64,11 @@ impl PlayerConstructor {
                 self.selected_char_index -= 1;
             }
         }
-        if self.input_device.should_begin_move_left() {
-            if self.selected_char_index == 0 {
-                self.selected_char_index = self.char_options.len() - 1;
+        if self.input_device.should_begin_move_right() {
+            if self.selected_char_index >= self.char_options.len() - 1 {
+                self.selected_char_index = 0;
             } else {
-                self.selected_char_index -= 1;
+                self.selected_char_index += 1;
             }
         }
         if self.input_device.should_begin_jump() {
@@ -84,20 +83,41 @@ impl PlayerConstructor {
             self.char_options[self.selected_char_index].as_mut();
 
         draw_text(
-            &format!("current player: Player{}", self.player_index),
+            &format!("Select Character for Player {}", self.player_index),
             10.0,
             30.0,
             20.0,
             BLACK,
         );
         draw_text(
-            &format!("selected character {}", selected_player.get_name()),
+            &format!("selected character: {}", selected_player.get_name()),
             10.0,
             60.0,
             20.0,
             BLACK,
         );
+        draw_text(
+            &format!(
+                "cycle through character with [{}] & [{}]",
+                self.input_device.get_left_keybind(),
+                self.input_device.get_right_keybind()
+            ),
+            10.0,
+            90.0,
+            20.0,
+            BLACK,
+        );
+        draw_text(
+            &format!(
+                "confirm choice with [{}]",
+                self.input_device.get_jump_keybind(),
+            ),
+            10.0,
+            120.0,
+            20.0,
+            BLACK,
+        );
 
-        selected_player.render_sprite_at_pos(20.0, 80.0, 1.0);
+        selected_player.render_sprite_at_pos(20.0, 150.0, 1.0);
     }
 }

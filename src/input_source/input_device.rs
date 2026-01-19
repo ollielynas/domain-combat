@@ -1,4 +1,7 @@
-use std::{collections::HashSet, hash::{Hash, Hasher}};
+use std::{
+    collections::HashSet,
+    hash::{Hash, Hasher},
+};
 
 use crate::input_source::{
     keyboard_input_device::{WasdKeyboardInputDevice, get_all_wasd_keyboards},
@@ -39,9 +42,7 @@ impl Default for InputDeviceData {
 
 pub fn update_inputs_devices(devices: &mut Vec<Box<dyn InputDevice>>) {
     let mut new_devices = vec![];
-    for device_type in [
-            get_all_wasd_keyboards(), get_all_numpads()
-        ] {
+    for device_type in [get_all_wasd_keyboards(), get_all_numpads()] {
         for device in device_type {
             new_devices.push(device);
         }
@@ -74,7 +75,7 @@ pub trait InputDevice {
 
     fn should_begin_move_right(&mut self) -> bool;
     fn should_begin_move_left(&mut self) -> bool;
-    
+
     fn should_begin_dash(&mut self) -> bool;
     fn should_begin_short_attack(&mut self) -> bool;
     fn should_begin_long_attack(&mut self) -> bool;
@@ -87,7 +88,7 @@ pub trait InputDevice {
     fn get_right_keybind(&mut self) -> String;
     fn get_up_keybind(&mut self) -> String;
     fn get_down_keybind(&mut self) -> String;
-    
+
     fn get_name(&mut self) -> String;
 
     fn enable_controller_instruction_text(&mut self) -> String {
@@ -103,7 +104,8 @@ pub trait InputDevice {
 
     fn update_start_game_toggle(&mut self) {
         if self.should_begin_short_attack() {
-            self.get_input_device_data().ready_to_play = !self.get_input_device_data().ready_to_play;
+            self.get_input_device_data().ready_to_play =
+                !self.get_input_device_data().ready_to_play;
         }
         if !self.get_input_device_data().enabled {
             self.get_input_device_data().ready_to_play = false;
