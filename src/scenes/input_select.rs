@@ -1,9 +1,11 @@
 use macroquad::prelude::*;
 use macroquad::{text::draw_text, time::get_frame_time};
 
+
 use crate::input_source::dummy_input_device::dummy_input;
 use crate::input_source::input_device::{InputDevice, update_inputs_devices};
-use crate::scenes::char_select::CharSelectState;
+use crate::scenes::keybind_info::KeyBindInfoState;
+use crate::scenes::lobby::LobbyState;
 use crate::scenes::scenes::Scene;
 
 pub struct InputSelect {
@@ -32,9 +34,9 @@ impl InputSelect {
             while self.input_devices.len() > 0 {
                 new_device_array.push(self.input_devices.pop().unwrap_or(dummy_input()));
             }
-            return Some(Scene::CharacterSelect(CharSelectState::new(
-                new_device_array,
-            )));
+
+            return Some(Scene::KeybindInfoScene(KeyBindInfoState::new(new_device_array)));
+
         } else {
             return None;
         }

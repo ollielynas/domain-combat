@@ -29,6 +29,7 @@ pub enum InputButton {
 pub struct InputDeviceData {
     pub enabled: bool,
     pub ready_to_play: bool,
+    pub score: i32,
 }
 
 impl Default for InputDeviceData {
@@ -36,6 +37,7 @@ impl Default for InputDeviceData {
         InputDeviceData {
             enabled: false,
             ready_to_play: false,
+            score: 0,
         }
     }
 }

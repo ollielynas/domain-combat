@@ -1,70 +1,82 @@
 use crate::Scene;
-use crate::game::player::Player;
+use crate::input_source::input_device::InputDevice;
+use crate::scenes::lobby::LobbyState;
 use macroquad::prelude::*;
 pub struct KeyBindInfoState {
-    players: Vec<Box<dyn Player>>,
+    input_devices: Vec<Box<dyn InputDevice>>,
     current_player: usize,
 }
 
 impl KeyBindInfoState {
-    pub fn new(players_vec: Vec<Box<dyn Player>>) -> KeyBindInfoState {
+    pub fn new(input_devices: Vec<Box<dyn InputDevice>>) -> KeyBindInfoState {
         return KeyBindInfoState {
-            players: players_vec,
+            input_devices: input_devices,
             current_player: 0,
         };
     }
-    pub fn get_players_mut(&mut self) -> &mut Vec<Box<dyn Player>> {
-        return &mut self.players;
+    pub fn get_input_devices_mut(&mut self) -> &mut Vec<Box<dyn InputDevice>> {
+        return &mut self.input_devices;
     }
 
     pub fn switch_scene(&mut self) -> Option<Scene> {
+        if self.current_player >= self.input_devices.len() {
+            return Some(Scene::Lobby(LobbyState::new(self.input_devices.drain(0..self.input_devices.len()).collect())))
+        }
         return None;
     }
 
+    pub fn process_input(&mut self) {
+        if self.current_player >= self.input_devices.len() {return;}
+        if self.input_devices[self.current_player].should_begin_jump() {
+            self.current_player += 1;
+        }
+    }
+
     pub fn render(&mut self) {
-        if self.current_player >= self.players.len() {
+
+        self.process_input();
+
+        if self.current_player >= self.input_devices.len() {
             return;
         }
 
-        self.players[self.current_player].render_sprite_at_pos(800.0, 45.0, 2.0);
-        let p_input = self.players[self.current_player].get_input_device_ref();
         draw_text(
-            &format!("Player [{}] Input Controls", self.current_player + 1),
+            &format!("Player {} Input Controls", self.current_player + 1),
             10.0,
             30.0,
             15.0,
             BLACK,
         );
         draw_text(
-            &format!("Input [{}] to move left", p_input.get_left_keybind()),
+            &format!("Input [{}] to move left", self.input_devices[self.current_player].get_left_keybind()),
             10.0,
             60.0,
             15.0,
             BLACK,
         );
         draw_text(
-            &format!("Input [{}] to move right", p_input.get_right_keybind()),
+            &format!("Input [{}] to move right", self.input_devices[self.current_player].get_right_keybind()),
             10.0,
             90.0,
             15.0,
             BLACK,
         );
         draw_text(
-            &format!("Input [{}] to attack upward", p_input.get_up_keybind()),
+            &format!("Input [{}] to attack upward", self.input_devices[self.current_player].get_up_keybind()),
             10.0,
             120.0,
             15.0,
             BLACK,
         );
         draw_text(
-            &format!("Input [{}] to attack downward", p_input.get_down_keybind()),
+            &format!("Input [{}] to attack downward", self.input_devices[self.current_player].get_down_keybind()),
             10.0,
             150.0,
             15.0,
             BLACK,
         );
         draw_text(
-            &format!("Input [{}] to jump", p_input.get_jump_keybind()),
+            &format!("Input [{}] to jump", self.input_devices[self.current_player].get_jump_keybind()),
             10.0,
             180.0,
             15.0,
@@ -73,7 +85,7 @@ impl KeyBindInfoState {
         draw_text(
             &format!(
                 "Input [{}] for fast attacks",
-                p_input.get_fast_attack_keybind()
+                self.input_devices[self.current_player].get_fast_attack_keybind()
             ),
             10.0,
             210.0,
@@ -83,10 +95,20 @@ impl KeyBindInfoState {
         draw_text(
             &format!(
                 "Input [{}] for strong attacks",
-                p_input.get_strong_attack_keybind()
+                self.input_devices[self.current_player].get_strong_attack_keybind()
             ),
             10.0,
             240.0,
+            15.0,
+            BLACK,
+        );
+        draw_text(
+            &format!(
+                "Press [{}] to continue",
+                self.input_devices[self.current_player].get_jump_keybind()
+            ),
+            30.0,
+            270.0,
             15.0,
             BLACK,
         );

@@ -3,11 +3,10 @@ use std::mem::swap;
 use macroquad::prelude::*;
 
 use crate::{
-    game::{
-        player::{Player, UniversalPlayerData},
+    config::window_config::WINDOW_SIZE, game::{
+        player::{self, Player, UniversalPlayerData},
         players::{debug_player1::DebugPlayer1, debug_player2::DebugPlayer2},
-    },
-    input_source::{dummy_input_device::dummy_input, input_device::InputDevice},
+    }, input_source::{dummy_input_device::dummy_input, input_device::InputDevice}
 };
 
 pub struct PlayerConstructor {
@@ -32,6 +31,10 @@ impl PlayerConstructor {
         players.push(Box::new(debug_player1));
         players.push(Box::new(debug_player2));
 
+        for player in players.iter_mut() {
+            player.set_health(player.get_max_health());
+        }
+
         return PlayerConstructor {
             char_options: players,
             input_device,
@@ -41,8 +44,7 @@ impl PlayerConstructor {
         };
     }
 
-    pub fn construct_player_if_ready(&mut self) -> Option<Box<dyn Player>> {
-        if self.ready_to_construct_player {
+    pub fn construct_player(&mut self) -> Box<dyn Player> {
             let mut player = self.char_options.remove(self.selected_char_index);
             let mut new_player_data =
                 UniversalPlayerData::new(dummy_input(), format!("Player {}", self.player_index));
@@ -50,11 +52,10 @@ impl PlayerConstructor {
             swap(&mut new_player_data.input_device, &mut self.input_device);
             swap(player.get_player_data(), &mut new_player_data);
 
-            return Some(player);
-        }
-
-        return None;
+            return player;
     }
+
+    pub fn is_player_ready_to_be_constructed(&self) -> bool {self.ready_to_construct_player}
 
     fn process_input(&mut self) {
         if self.input_device.should_begin_move_left() {
@@ -72,52 +73,49 @@ impl PlayerConstructor {
             }
         }
         if self.input_device.should_begin_jump() {
-            self.ready_to_construct_player = true;
+            self.ready_to_construct_player = !self.ready_to_construct_player;
         }
     }
 
-    pub fn render(&mut self) {
+    pub fn render(&mut self, index: usize, total: usize) {
         self.process_input();
+
+        let left_pos = WINDOW_SIZE.0 as f32 * ((index + 1) as f32 / (total + 2) as f32);
+        let top_pos = WINDOW_SIZE.1 as f32 * 0.75;
 
         let selected_player: &mut (dyn Player + 'static) =
             self.char_options[self.selected_char_index].as_mut();
 
-        draw_text(
-            &format!("Select Character for Player {}", self.player_index),
-            10.0,
-            30.0,
-            20.0,
-            BLACK,
-        );
-        draw_text(
-            &format!("selected character: {}", selected_player.get_name()),
-            10.0,
-            60.0,
-            20.0,
-            BLACK,
-        );
+        let scale = match total {
+            0..3 => 3.0,
+            3..=5 => 2.0,
+            _ => 1.0
+        };
+
+        selected_player.render_sprite_at_pos_with_nametag(left_pos, top_pos - selected_player.get_height() * scale, scale, index + 1);
         draw_text(
             &format!(
-                "cycle through character with [{}] & [{}]",
-                self.input_device.get_left_keybind(),
-                self.input_device.get_right_keybind()
+                "<- {} ->",
+                // self.input_device.get_left_keybind(),
+                selected_player.get_name(),
+                // self.input_device.get_right_keybind()
             ),
-            10.0,
-            90.0,
+            left_pos,
+            top_pos + 25.0,
             20.0,
             BLACK,
         );
         draw_text(
             &format!(
-                "confirm choice with [{}]",
+                "Ready to play: {} [{}]",
+                self.is_player_ready_to_be_constructed(),
                 self.input_device.get_jump_keybind(),
             ),
-            10.0,
-            120.0,
+            left_pos,
+            top_pos + 50.0,
             20.0,
             BLACK,
         );
 
-        selected_player.render_sprite_at_pos(20.0, 150.0, 1.0);
     }
 }
