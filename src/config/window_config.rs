@@ -1,5 +1,5 @@
 use macroquad::prelude::*;
-pub const WINDOW_SIZE: (i32, i32) = (1280, 720);
+use crate::consts::*;
 
 pub fn get_window_config() -> Conf {
     return Conf {

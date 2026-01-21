@@ -2,6 +2,7 @@ pub mod config;
 pub mod game;
 pub mod input_source;
 pub mod scenes;
+pub mod consts;
 
 use macroquad::prelude::*;
 

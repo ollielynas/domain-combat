@@ -1,9 +1,9 @@
 use std::mem::swap;
 
 use macroquad::prelude::*;
-
+use crate::consts::*;
 use crate::{
-    config::window_config::WINDOW_SIZE, game::{
+     game::{
         player::{self, Player, UniversalPlayerData},
         players::{debug_player1::DebugPlayer1, debug_player2::DebugPlayer2},
     }, input_source::{dummy_input_device::dummy_input, input_device::InputDevice}

@@ -13,15 +13,20 @@ impl Player for DebugPlayer2 {
         return &mut self.data;
     }
 
+
+    fn get_player_data_ref(&self) -> &UniversalPlayerData {
+        &self.data
+    }
+
     fn render_sprite_at_pos(&mut self, x: f32, y:f32, scale:f32) {
         draw_rectangle(x, y, self.get_width()*scale, self.get_height()*scale, RED);
     }
 
     fn get_height(&self) -> f32 {
-        30.0
+        50.0
     }
     fn get_width(&self) -> f32 {
-        15.0
+        25.0
     }
 
 
