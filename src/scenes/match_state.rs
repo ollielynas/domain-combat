@@ -1,3 +1,5 @@
+use std::{thread::sleep, time::Duration};
+
 use macroquad::{color::ORANGE, models::draw_cylinder, shapes::{draw_circle, draw_circle_lines, draw_rectangle_lines, draw_rectangle_lines_ex}, text::draw_text};
 use rapier2d::{control::*, parry::{query::contact, simba::scalar::SupersetOf}, prelude::{ColliderSet, PhysicsPipeline, RigidBody, RigidBodySet}};
 use rapier2d::prelude::*;
@@ -135,7 +137,7 @@ impl MatchState {
             draw_text(&format!(" mass: {}", b.1.mass()), xy.x, xy.y+15.0, 15.0, BLACK);
 
             draw_text(&format!(" sleeping: {}", b.1.activation().sleeping), xy.x, xy.y+DEBUG_TEXT_SIZE*2.0, DEBUG_TEXT_SIZE, BLACK);
-            draw_line(xy.x, xy.y + b.1.linvel().y, xy.x + b.1.linvel().x, xy.y, 2.0, RED);
+            draw_line(xy.x, xy.y, xy.x + b.1.linvel().x, xy.y + b.1.linvel().y, 2.0, RED);
             let force =  b.1.user_force();
 
             draw_line(xy.x, xy.y, xy.x  + force.data.0[0][0] * ACC_DEBUG_ARROW_MULT, xy.y  + force.data.0[0][1] * ACC_DEBUG_ARROW_MULT, 2.0, GREEN);
@@ -209,6 +211,8 @@ impl MatchState {
 
     pub fn simulate(&mut self) {
 
+        // sleep(Duration::from_millis(100));
+
         let (collision_send, collision_recv) = std::sync::mpsc::channel();
         let (contact_force_send, contact_force_recv) = std::sync::mpsc::channel();
         let event_handler = ChannelEventCollector::new(collision_send, contact_force_send);
@@ -219,7 +223,7 @@ impl MatchState {
         self.physics_pipeline.step(
             &vector![0.0,GRAVITY],
             &IntegrationParameters {
-                dt: 1.0/60.0, // exprox framerate
+                dt: get_frame_time(), // exprox framerate
                 min_ccd_dt: (1.0/60.0)/100.0, // 100 ccd substeps per step
                 contact_damping_ratio: 0.5, // not really relervent cos there are no joints
                 contact_natural_frequency: 30.0,
