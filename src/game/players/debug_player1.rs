@@ -26,10 +26,10 @@ impl Player for DebugPlayer1 {
     }
 
     fn get_height(&self) -> f32 {
-        80.0
+        40.0
     }
     fn get_width(&self) -> f32 {
-        40.0
+        20.0
     }
 
     fn get_max_health(&self) -> f32 {

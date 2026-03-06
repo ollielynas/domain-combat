@@ -25,6 +25,7 @@ impl LobbyState {
         };
     }
 
+
     fn process_input(&mut self) {
         if self.player_constructors.iter().all(|x| (x).is_player_ready_to_be_constructed()) {
             let mut player_constructors_temp = vec![];
@@ -47,6 +48,7 @@ impl LobbyState {
         self.process_input();
         let total = self.player_constructors.len();
         for (i, player_constructor) in self.player_constructors.iter_mut().enumerate() {
+
             player_constructor.render(i as usize, total);
         }
     }

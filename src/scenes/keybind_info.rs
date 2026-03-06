@@ -40,6 +40,10 @@ impl KeyBindInfoState {
             return;
         }
 
+        for device in &mut self.input_devices {
+            device.as_mut().update();
+        }
+
         draw_text(
             &format!("Player {} Input Controls", self.current_player + 1),
             10.0,

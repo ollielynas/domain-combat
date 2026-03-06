@@ -17,6 +17,7 @@ pub struct UniversalPlayerData {
     pub hitbox_collider_handle: Option<ColliderHandle>,
     pub on_ground: bool,
     pub jump_buffer: f32,
+    pub jump_height_boost: f32,
 }
 
 impl UniversalPlayerData {
@@ -32,6 +33,7 @@ impl UniversalPlayerData {
             hitbox_collider_handle: None,
             on_ground: false,
             jump_buffer: 0.0,
+            jump_height_boost: 0.0,
         }
     }
 
@@ -95,11 +97,13 @@ pub trait Player {
             .translation(vector![x,y])
             .lock_rotations()
             .can_sleep(false)
+            .linear_damping(AIR_FRICTION)
             .build();
         let collider = ColliderBuilder::capsule_y(self.get_height() / 2.0 - self.get_width()/2.0, self.get_width()/2.0)
             .friction(PLAYER_FRICTION)
             .build()
             ;
+
         let detect_floor = ColliderBuilder::ball(self.get_width()*COLLIDER_BALL_SCALE_SIZE)
             .sensor(true)
             .mass(0.0)
@@ -160,12 +164,22 @@ pub trait Player {
         if self.get_player_data().jump_buffer > 0.0 {
             self.get_player_data().jump_buffer -= get_frame_time();
         }
+        if self.get_player_data().jump_height_boost > 0.0 {
+            self.get_player_data().jump_height_boost -= get_frame_time();
+            if !self.get_input_device_mut().is_jump_key_down()  {
+                self.get_player_data().jump_height_boost = 0.0;
+            }
+        }
 
         if self.get_on_ground() && self.get_player_data().jump_buffer > 0.0  {
             self.get_player_data().jump_buffer = 0.0;
+            self.get_player_data().jump_height_boost = JUMP_HEIGHT_BOOST_TIMER;
             rigid_body.set_linvel(vector![rigid_body.linvel().x, 0.0], true);
              rigid_body.apply_impulse(vector![0.0,-JUMP_FORCE_REL_TO_GRAVITY_AND_MASS * GRAVITY * rigid_body.mass() * self.jump_multiplier() ], true);
         }
+
+
+
 
         if self.get_input_device_mut().should_begin_move_left() && velocity.x >= 0.0 {
             rigid_body.apply_impulse(vector![-FIRST_ACC_BOOST * rigid_body.mass(), 0.0], true);
@@ -181,6 +195,11 @@ pub trait Player {
         };
 
         rigid_body.reset_forces(true);
+
+        if self.get_input_device_mut().is_jump_key_down() && self.get_player_data().jump_height_boost > 0.0 {
+            rigid_body.add_force(vector![0.0,-JUMP_HEIGHT_BOOST_FORCE_REL_TO_GRAVITY_AND_MASS * GRAVITY * rigid_body.mass() * self.jump_multiplier() ], true);
+        }
+
         if direction_mod != 0.0 {
         if self.get_on_ground() {
             rigid_body.add_force(vector![
@@ -192,7 +211,6 @@ pub trait Player {
                 ,0.0], true);
         }
         }
-
     }
 
     fn get_mass(&self, rigid_body_set: &RigidBodySet) -> f32 {

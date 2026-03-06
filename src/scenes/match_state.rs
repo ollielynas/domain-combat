@@ -84,8 +84,16 @@ impl MatchState {
 
     }
 
+    fn update_inputs(&mut self) {
+        for p in &mut self.players {
+            p.get_input_device_mut().as_mut().update();
+        }
+    }
+
 
     pub fn render(&mut self) {
+
+        self.update_inputs();
 
         self.simulate();
 
@@ -149,6 +157,8 @@ impl MatchState {
                 draw_text(&format!("jump_buffer: {}", p.get_player_data_ref().jump_buffer), xy.x, xy.y+p.get_height()/2.0, DEBUG_TEXT_SIZE, BLACK);
             }else if p.get_on_ground() {
                 draw_text("on_ground", xy.x, xy.y+p.get_height()/2.0, DEBUG_TEXT_SIZE, BLACK);
+            }else if p.get_player_data_ref().jump_height_boost > 0.0 {
+                draw_text(&format!("jump_boost: {}", p.get_player_data_ref().jump_height_boost), xy.x, xy.y+p.get_height()/2.0, DEBUG_TEXT_SIZE, BLACK);
             }
 
             let inputs = vec![
@@ -229,15 +239,6 @@ impl MatchState {
                 contact_natural_frequency: 30.0,
                 length_unit: GAME_PHYSICS_SCALE,
                 ..Default::default()
-
-                // normalized_allowed_linear_error: (),
-                // normalized_max_corrective_velocity: (),
-                // normalized_prediction_distance: (),
-                // num_solver_iterations: (),
-                // num_internal_pgs_iterations: (),
-                // num_internal_stabilization_iterations: (),
-                // min_island_size: (),
-                // max_ccd_substeps: () },
             },
             &mut self.island_manager,
             &mut self.broad_phase,

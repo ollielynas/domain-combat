@@ -58,6 +58,7 @@ impl PlayerConstructor {
     pub fn is_player_ready_to_be_constructed(&self) -> bool {self.ready_to_construct_player}
 
     fn process_input(&mut self) {
+        self.input_device.as_mut().update();
         if self.input_device.should_begin_move_left() {
             if self.selected_char_index == 0 {
                 self.selected_char_index = self.char_options.len() - 1;

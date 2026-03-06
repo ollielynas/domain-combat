@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Game Controller</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap");
+
+            :root {
+                --bg: #181818;
+                --panel: #222222;
+                --btn: #3a3a3a;
+                --btn-border: #555555;
+                --btn-hover: #4a4a4a;
+                --btn-pressed: #222222;
+                --text: #cccccc;
+                --text-dim: #888888;
+                --accent: #9a9a9a;
+                --toggle-on: #6a6a6a;
+            }
+
+            * {
+                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
+            }
+
+            body {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: space-between;
+                width: 100dvw;
+                height: 100dvh;
+                padding: 2dvh 4dvw;
+                background: var(--bg);
+                color: var(--text);
+                font-family: "Share Tech Mono", "Courier New", monospace;
+            }
+
+            /* ── Top bar ── */
+            #topbar {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                border-bottom: 1px solid #333;
+                padding-bottom: 1.5dvh;
+            }
+
+            /* Base button style — macroquad flat look */
+            button {
+                background: var(--btn);
+                color: var(--text);
+                border: 1px solid var(--btn-border);
+                border-radius: 0;
+                font-family: inherit;
+                cursor: pointer;
+                user-select: none;
+                -webkit-tap-highlight-color: transparent;
+                transition: background 0.05s;
+            }
+            button:hover {
+                background: var(--btn-hover);
+            }
+            button.pressed,
+            button:active {
+                background: var(--btn-pressed);
+                border-color: var(--accent);
+                color: #fff;
+            }
+
+            #disconnect {
+                font-size: 1.4dvw;
+                padding: 0.5dvw 1.2dvw;
+                text-transform: lowercase;
+                letter-spacing: 0.05em;
+            }
+
+            /* ── Toggles ── */
+            .toggles {
+                display: flex;
+                gap: 3dvw;
+                align-items: center;
+            }
+            .toggle-group {
+                display: flex;
+                align-items: center;
+                gap: 1dvw;
+                font-size: 1.6dvw;
+                color: var(--text-dim);
+                text-transform: lowercase;
+                letter-spacing: 0.05em;
+            }
+
+            /* macroquad-style pill: flat, rectangular track */
+            .pill {
+                position: relative;
+                width: 7dvw;
+                height: 3.5dvw;
+                cursor: pointer;
+            }
+            .pill input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+            .pill-track {
+                position: absolute;
+                inset: 0;
+                background: var(--panel);
+                border: 1px solid var(--btn-border);
+                border-radius: 0;
+                transition:
+                    background 0.15s,
+                    border-color 0.15s;
+            }
+            .pill input:checked + .pill-track {
+                background: var(--toggle-on);
+                border-color: var(--accent);
+            }
+            .pill-track::after {
+                content: "";
+                position: absolute;
+                top: 0.3dvw;
+                left: 0.3dvw;
+                width: 2.9dvw;
+                height: 2.9dvw;
+                background: var(--btn-border);
+                border-radius: 0;
+                transition:
+                    transform 0.15s,
+                    background 0.15s;
+            }
+            .pill input:checked + .pill-track::after {
+                transform: translateX(3.5dvw);
+                background: #ccc;
+            }
+
+            /* ── Main layout ── */
+            #button-area {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+                flex: 1;
+                padding-top: 2dvh;
+            }
+
+            /* ── Action pad: diamond of 4 square buttons ── */
+            .action-pad {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(3, 1fr);
+                gap: 1dvw;
+                width: 35dvw;
+                height: 35dvw;
+                flex-shrink: 0;
+            }
+            .action-pad button {
+                width: 100%;
+                height: 100%;
+                font-size: 1.5dvw;
+                line-height: 1.3;
+                text-transform: lowercase;
+                letter-spacing: 0.03em;
+            }
+            [data-action="jump"] {
+                grid-column: 2;
+                grid-row: 1;
+            }
+            [data-action="dash"] {
+                grid-column: 1;
+                grid-row: 2;
+            }
+            [data-action="strong"] {
+                grid-column: 3;
+                grid-row: 2;
+            }
+            [data-action="fast"] {
+                grid-column: 2;
+                grid-row: 3;
+            }
+
+            /* ── D-pad cross ── */
+            .dir-pad {
+                width: 35dvw;
+                height: 35dvw;
+                flex-shrink: 0;
+            }
+            .dir-pad.grid-mode {
+                display: grid;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr 1fr;
+                gap: 1dvw;
+            }
+            .dir-pad.grid-mode [data-action="up"] {
+                grid-column: 2;
+                grid-row: 1;
+            }
+            .dir-pad.grid-mode [data-action="left"] {
+                grid-column: 1;
+                grid-row: 2;
+            }
+            .dir-pad.grid-mode [data-action="right"] {
+                grid-column: 3;
+                grid-row: 2;
+            }
+            .dir-pad.grid-mode [data-action="down"] {
+                grid-column: 2;
+                grid-row: 3;
+            }
+            .dir-pad.grid-mode button {
+                width: 100%;
+                height: 100%;
+                font-size: 1.6dvw;
+                text-transform: lowercase;
+                letter-spacing: 0.03em;
+            }
+
+            /* ── WASD pad ── */
+            .wasd-pad {
+                width: 35dvw;
+                height: 35dvw;
+                flex-shrink: 0;
+                display: none;
+                grid-template-columns: 1fr 1fr 1fr;
+                grid-template-rows: 1fr 1fr;
+                gap: 1dvw;
+                align-content: center;
+            }
+            .wasd-pad [data-action="up"] {
+                grid-column: 2;
+                grid-row: 1;
+            }
+            .wasd-pad [data-action="left"] {
+                grid-column: 1;
+                grid-row: 2;
+            }
+            .wasd-pad [data-action="down"] {
+                grid-column: 2;
+                grid-row: 2;
+            }
+            .wasd-pad [data-action="right"] {
+                grid-column: 3;
+                grid-row: 2;
+            }
+            .wasd-pad button {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.4dvw;
+            }
+            .wasd-pad .key-letter {
+                font-size: 3dvw;
+                font-weight: bold;
+                color: #fff;
+                line-height: 1;
+            }
+            .wasd-pad .key-label {
+                font-size: 1dvw;
+                color: var(--text-dim);
+                text-transform: lowercase;
+            }
+
+            /* ── Thumbstick ── */
+            #stick-wrap {
+                width: 35dvw;
+                height: 35dvw;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+            }
+            #stick-base {
+                position: relative;
+                width: 28dvw;
+                height: 28dvw;
+                border-radius: 50%;
+                background: var(--panel);
+                border: 1px solid var(--btn-border);
+                touch-action: none;
+                user-select: none;
+            }
+            #stick-base::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 30%;
+                height: 30%;
+                border-radius: 50%;
+                border: 1px solid #444;
+                pointer-events: none;
+            }
+            #stick-knob {
+                position: absolute;
+                width: 40%;
+                height: 40%;
+                border-radius: 50%;
+                background: var(--btn);
+                border: 1px solid var(--btn-border);
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                pointer-events: none;
+                transition: background 0.05s;
+            }
+            #stick-knob.active {
+                background: var(--btn-pressed);
+                border-color: var(--accent);
+            }
+        </style>
+    </head>
+    <body>
+        <div id="topbar">
+            <button id="disconnect">disconnect</button>
+            <div class="toggles">
+                <div class="toggle-group">
+                    <span>wasd</span>
+                    <label class="pill">
+                        <input type="checkbox" id="toggle-wasd" />
+                        <span class="pill-track"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <span>stick</span>
+                    <label class="pill">
+                        <input type="checkbox" id="toggle-stick" />
+                        <span class="pill-track"></span>
+                    </label>
+                </div>
+                <div class="toggle-group">
+                    <span>swap sides</span>
+                    <label class="pill">
+                        <input type="checkbox" id="toggle-swap" />
+                        <span class="pill-track"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div id="button-area">
+            <!-- Action buttons -->
+            <div class="action-pad" id="action-pad">
+                <button data-action="jump">jump</button>
+                <button data-action="dash">dash</button>
+                <button data-action="strong">strong<br />attack</button>
+                <button data-action="fast">fast<br />attack</button>
+            </div>
+
+            <!-- D-pad (default) -->
+            <div class="dir-pad grid-mode" id="dir-pad">
+                <button data-action="up">up</button>
+                <button data-action="left">left</button>
+                <button data-action="right">right</button>
+                <button data-action="down">down</button>
+            </div>
+
+            <!-- WASD -->
+            <div class="wasd-pad" id="wasd-pad">
+                <button data-action="up">
+                    <span class="key-letter">W</span>
+                    <span class="key-label">up</span>
+                </button>
+                <button data-action="left">
+                    <span class="key-letter">A</span>
+                    <span class="key-label">left</span>
+                </button>
+                <button data-action="down">
+                    <span class="key-letter">S</span>
+                    <span class="key-label">down</span>
+                </button>
+                <button data-action="right">
+                    <span class="key-letter">D</span>
+                    <span class="key-label">right</span>
+                </button>
+            </div>
+
+            <!-- Thumbstick -->
+            <div id="stick-wrap">
+                <div id="stick-base">
+                    <div id="stick-knob"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            const post = (action, state) =>
+                fetch(`/${action}/${state}`, { method: "POST" });
+
+            document.querySelectorAll("[data-action]").forEach((btn) => {
+                const action = btn.dataset.action;
+                btn.addEventListener("touchstart", (e) => {
+                    e.preventDefault();
+                    post(action, "true");
+                    btn.classList.add("pressed");
+                });
+                btn.addEventListener("touchend", (e) => {
+                    e.preventDefault();
+                    post(action, "false");
+                    btn.classList.remove("pressed");
+                });
+                btn.addEventListener("mousedown", () => {
+                    post(action, "true");
+                    btn.classList.add("pressed");
+                });
+                btn.addEventListener("mouseup", () => {
+                    post(action, "false");
+                    btn.classList.remove("pressed");
+                });
+                btn.addEventListener("mouseleave", () => {
+                    if (btn.classList.contains("pressed")) {
+                        post(action, "false");
+                        btn.classList.remove("pressed");
+                    }
+                });
+            });
+
+            /* Physical keyboard */
+            const keyMap = {
+                w: "up",
+                a: "left",
+                s: "down",
+                d: "right",
+                ArrowUp: "up",
+                ArrowLeft: "left",
+                ArrowDown: "down",
+                ArrowRight: "right",
+                " ": "jump",
+                z: "fast",
+                x: "strong",
+                c: "dash",
+            };
+            const held = new Set();
+            document.addEventListener("keydown", (e) => {
+                const action = keyMap[e.key];
+                if (!action || held.has(e.key)) return;
+                held.add(e.key);
+                post(action, "true");
+                document
+                    .querySelectorAll(`[data-action="${action}"]`)
+                    .forEach((b) => b.classList.add("pressed"));
+            });
+            document.addEventListener("keyup", (e) => {
+                const action = keyMap[e.key];
+                if (!action) return;
+                held.delete(e.key);
+                post(action, "false");
+                document
+                    .querySelectorAll(`[data-action="${action}"]`)
+                    .forEach((b) => b.classList.remove("pressed"));
+            });
+
+            document
+                .getElementById("disconnect")
+                .addEventListener("click", () => {
+                    if (confirm("disconnect controller?")) {
+                        fetch("/disconnect", { method: "POST" }).then(() => {
+                            document.body.innerHTML =
+                                "<p style='color:#ccc;font-family:monospace;padding:2rem'>disconnected</p>";
+                        });
+                    }
+                });
+
+            /* Direction mode */
+            const dirPad = document.getElementById("dir-pad");
+            const wasdPad = document.getElementById("wasd-pad");
+            const stickWrap = document.getElementById("stick-wrap");
+
+            function setDirMode(mode) {
+                dirPad.style.display = mode === "dpad" ? "" : "none";
+                wasdPad.style.display = mode === "wasd" ? "grid" : "none";
+                stickWrap.style.display = mode === "stick" ? "flex" : "none";
+                if (mode !== "stick") resetKnob();
+            }
+
+            document
+                .getElementById("toggle-wasd")
+                .addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        document.getElementById("toggle-stick").checked = false;
+                        setDirMode("wasd");
+                    } else setDirMode("dpad");
+                });
+            document
+                .getElementById("toggle-stick")
+                .addEventListener("change", (e) => {
+                    if (e.target.checked) {
+                        document.getElementById("toggle-wasd").checked = false;
+                        setDirMode("stick");
+                    } else setDirMode("dpad");
+                });
+
+            /* Thumbstick */
+            const base = document.getElementById("stick-base");
+            const knob = document.getElementById("stick-knob");
+            const DEADZONE = 0.25;
+            const active = {
+                up: false,
+                down: false,
+                left: false,
+                right: false,
+            };
+
+            function setDir(dir, on) {
+                if (active[dir] === on) return;
+                active[dir] = on;
+                post(dir, on ? "true" : "false");
+            }
+            function releaseAll() {
+                ["up", "down", "left", "right"].forEach((d) =>
+                    setDir(d, false),
+                );
+            }
+            function handleStick(cx, cy) {
+                const rect = base.getBoundingClientRect();
+                const R = rect.width / 2;
+                let dx = cx - (rect.left + R),
+                    dy = cy - (rect.top + R);
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist > R) {
+                    dx = (dx / dist) * R;
+                    dy = (dy / dist) * R;
+                }
+                knob.style.left = `${50 + (dx / R) * 30}%`;
+                knob.style.top = `${50 + (dy / R) * 30}%`;
+                const nx = dx / R,
+                    ny = dy / R;
+                if (Math.abs(nx) < DEADZONE && Math.abs(ny) < DEADZONE) {
+                    releaseAll();
+                    return;
+                }
+                setDir("left", nx < -DEADZONE);
+                setDir("right", nx > DEADZONE);
+                setDir("up", ny < -DEADZONE);
+                setDir("down", ny > DEADZONE);
+            }
+            function resetKnob() {
+                knob.style.left = "50%";
+                knob.style.top = "50%";
+                knob.classList.remove("active");
+                releaseAll();
+            }
+
+            let dragging = false;
+            base.addEventListener("mousedown", (e) => {
+                dragging = true;
+                knob.classList.add("active");
+                handleStick(e.clientX, e.clientY);
+            });
+            window.addEventListener("mousemove", (e) => {
+                if (dragging) handleStick(e.clientX, e.clientY);
+            });
+            window.addEventListener("mouseup", () => {
+                if (dragging) {
+                    dragging = false;
+                    resetKnob();
+                }
+            });
+            base.addEventListener(
+                "touchstart",
+                (e) => {
+                    e.preventDefault();
+                    knob.classList.add("active");
+                    handleStick(e.touches[0].clientX, e.touches[0].clientY);
+                },
+                { passive: false },
+            );
+            base.addEventListener(
+                "touchmove",
+                (e) => {
+                    e.preventDefault();
+                    handleStick(e.touches[0].clientX, e.touches[0].clientY);
+                },
+                { passive: false },
+            );
+            base.addEventListener("touchend", (e) => {
+                e.preventDefault();
+                resetKnob();
+            });
+
+            /* Swap sides */
+            document
+                .getElementById("toggle-swap")
+                .addEventListener("change", (e) => {
+                    const area = document.getElementById("button-area");
+                    const actionPad = document.getElementById("action-pad");
+                    if (e.target.checked) area.appendChild(actionPad);
+                    else area.insertBefore(actionPad, area.firstChild);
+                });
+        </script>
+    </body>
+</html>

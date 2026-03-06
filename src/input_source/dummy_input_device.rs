@@ -13,7 +13,7 @@ pub struct DummyInputDevice {
 
 pub fn dummy_input() -> Box<dyn InputDevice> {
     return Box::new( DummyInputDevice {
-        device_data: InputDeviceData { enabled: true, ready_to_play: true, score: 0 }
+        device_data: InputDeviceData { enabled: false, ready_to_play: false, score: 0 }
     });
 }
 
@@ -26,8 +26,15 @@ impl InputDevice for DummyInputDevice {
         "Dummy".to_string()
     }
 
+    fn is_disconnected(&self) -> bool {
+        true
+    }
+
     fn get_input_device_data(&mut self) -> &mut InputDeviceData {
         return &mut self.device_data;
+    }
+    fn get_input_device_data_ref(&self) -> &InputDeviceData {
+        return &self.device_data;
     }
 
     fn should_begin_jump(&mut self) -> bool {
@@ -67,6 +74,10 @@ impl InputDevice for DummyInputDevice {
     }
 
     fn should_begin_long_attack(&mut self) -> bool {
+        false
+    }
+
+    fn is_jump_key_down(&mut self) -> bool {
         false
     }
 
