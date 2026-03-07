@@ -4,7 +4,7 @@ use std::{
 };
 
 use crate::input_source::{
-    keyboard_input_device::{WasdKeyboardInputDevice, get_all_wasd_keyboards}, numpad_input_device::{NumpadInputDevice, get_all_numpads}
+    keyboard_input_device::{WasdKeyboardInputDevice, get_all_wasd_keyboards}, midi_input_device::get_midi_inputs, numpad_input_device::{NumpadInputDevice, get_all_numpads}
 };
 
 pub enum InputDirectionLeftRight {
@@ -44,7 +44,7 @@ impl Default for InputDeviceData {
 pub fn update_inputs_devices(devices: &mut Vec<Box<dyn InputDevice>>) {
     devices.retain(|x| !x.is_disconnected());
     let mut new_devices = vec![];
-    for device_type in [get_all_wasd_keyboards(), get_all_numpads()] {
+    for device_type in [get_all_wasd_keyboards(), get_all_numpads(), get_midi_inputs()] {
         for device in device_type {
             new_devices.push(device);
         }
@@ -97,6 +97,7 @@ pub trait InputDevice {
     fn get_up_keybind(&mut self) -> String;
     fn get_down_keybind(&mut self) -> String;
 
+    /// todo: chamge this to return a reference
     fn get_name(&mut self) -> String;
 
     fn enable_controller_instruction_text(&mut self) -> String {

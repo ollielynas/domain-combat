@@ -22,8 +22,6 @@ pub struct UniversalPlayerData {
 
 impl UniversalPlayerData {
     pub fn new(input_device: Box<dyn InputDevice>, name: String) -> UniversalPlayerData {
-
-
         UniversalPlayerData {
             input_device,
             player_name: name,

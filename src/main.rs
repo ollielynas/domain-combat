@@ -4,6 +4,7 @@ pub mod input_source;
 pub mod scenes;
 pub mod gui;
 pub mod consts;
+pub mod animations;
 
 use std::thread::sleep;
 use std::time;
