@@ -161,12 +161,27 @@
             .action-pad button {
                 width: 100%;
                 height: 100%;
-                font-size: 1.5dvw;
-                line-height: 1.3;
+                font-size: 1.3dvw;
+                line-height: 1.4;
                 text-transform: lowercase;
                 letter-spacing: 0.03em;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 0.3dvw;
             }
-            [data-action="jump"] {
+            .action-pad .key-binding {
+                font-size: 1.8dvw;
+                font-weight: bold;
+                color: #fff;
+                line-height: 1;
+            }
+            .action-pad .key-label {
+                font-size: 1.4dvw;
+                color: var(--text);
+            }
+            [data-action="fast"] {
                 grid-column: 2;
                 grid-row: 1;
             }
@@ -178,7 +193,7 @@
                 grid-column: 3;
                 grid-row: 2;
             }
-            [data-action="fast"] {
+            [data-action="jump"] {
                 grid-column: 2;
                 grid-row: 3;
             }
@@ -226,7 +241,7 @@
                 flex-shrink: 0;
                 display: none;
                 grid-template-columns: 1fr 1fr 1fr;
-                grid-template-rows: 1fr 1fr;
+                grid-template-rows: 1fr 1fr 1.2fr;
                 gap: 1dvw;
                 align-content: center;
             }
@@ -246,6 +261,16 @@
                 grid-column: 3;
                 grid-row: 2;
             }
+            .wasd-pad [data-action="jump"] {
+                grid-column: 1 / span 3;
+                grid-row: 3;
+            }
+            .wasd-pad .spacebar-label {
+                font-size: 1.8dvw;
+                letter-spacing: 0.15em;
+                color: var(--text-dim);
+                text-transform: lowercase;
+            }
             .wasd-pad button {
                 width: 100%;
                 height: 100%;
@@ -262,8 +287,8 @@
                 line-height: 1;
             }
             .wasd-pad .key-label {
-                font-size: 1dvw;
-                color: var(--text-dim);
+                font-size: 1.4dvw;
+                color: var(--text);
                 text-transform: lowercase;
             }
 
@@ -348,10 +373,22 @@
         <div id="button-area">
             <!-- Action buttons -->
             <div class="action-pad" id="action-pad">
-                <button data-action="jump">jump</button>
-                <button data-action="dash">dash</button>
-                <button data-action="strong">strong<br />attack</button>
-                <button data-action="fast">fast<br />attack</button>
+                <button data-action="fast">
+                    <span class="key-binding">Z / J</span>
+                    <span class="key-label">fast attack</span>
+                </button>
+                <button data-action="dash">
+                    <span class="key-binding">C / U</span>
+                    <span class="key-label">dash</span>
+                </button>
+                <button data-action="strong">
+                    <span class="key-binding">X / K</span>
+                    <span class="key-label">strong attack</span>
+                </button>
+                <button data-action="jump">
+                    <span class="key-binding">V / I / L</span>
+                    <span class="key-label">jump</span>
+                </button>
             </div>
 
             <!-- D-pad (default) -->
@@ -379,6 +416,9 @@
                 <button data-action="right">
                     <span class="key-letter">D</span>
                     <span class="key-label">right</span>
+                </button>
+                <button data-action="jump">
+                    <span class="spacebar-label">space / V / I / L — jump</span>
                 </button>
             </div>
 
@@ -423,7 +463,9 @@
             });
 
             /* Physical keyboard */
+            /* Physical keyboard — multiple keys per action */
             const keyMap = {
+                // Movement
                 w: "up",
                 a: "left",
                 s: "down",
@@ -432,10 +474,20 @@
                 ArrowLeft: "left",
                 ArrowDown: "down",
                 ArrowRight: "right",
+                // Jump: V, Space, I, L
+                v: "jump",
                 " ": "jump",
+                i: "jump",
+                l: "jump",
+                // Fast attack: Z, J
                 z: "fast",
+                j: "fast",
+                // Strong attack: X, K
                 x: "strong",
+                k: "strong",
+                // Dash: C, U
                 c: "dash",
+                u: "dash",
             };
             const held = new Set();
             document.addEventListener("keydown", (e) => {
@@ -468,15 +520,46 @@
                     }
                 });
 
+            /* Release every pressed button and clear all held state */
+            function releaseAllButtons() {
+                // Release all direction actions
+                ["up", "down", "left", "right"].forEach((d) => {
+                    if (active[d]) {
+                        active[d] = false;
+                        post(d, "false");
+                    }
+                });
+                // Release all button actions
+                ["jump", "fast", "strong", "dash"].forEach((a) =>
+                    post(a, "false"),
+                );
+                // Release physical keyboard held keys
+                held.forEach((key) => {
+                    const action = keyMap[key];
+                    if (action) post(action, "false");
+                });
+                held.clear();
+                // Clear all pressed visuals
+                document
+                    .querySelectorAll("button.pressed")
+                    .forEach((b) => b.classList.remove("pressed"));
+            }
+
             /* Direction mode */
             const dirPad = document.getElementById("dir-pad");
             const wasdPad = document.getElementById("wasd-pad");
             const stickWrap = document.getElementById("stick-wrap");
+            const actionJump = document.querySelector(
+                ".action-pad [data-action='jump']",
+            );
 
             function setDirMode(mode) {
+                releaseAllButtons();
                 dirPad.style.display = mode === "dpad" ? "" : "none";
                 wasdPad.style.display = mode === "wasd" ? "grid" : "none";
                 stickWrap.style.display = mode === "stick" ? "flex" : "none";
+                // Hide jump from action pad in WASD mode (spacebar handles it)
+                actionJump.style.visibility = mode === "wasd" ? "hidden" : "";
                 if (mode !== "stick") resetKnob();
             }
 
