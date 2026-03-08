@@ -1,6 +1,6 @@
 use macroquad::input::{KeyCode, is_key_down, is_key_pressed};
 
-use crate::input_source::input_device::{InputDevice, InputDeviceData, InputDirectionLeftRight, InputDirectionUpDown};
+use crate::input_source::input_device::{InputDevice, InputDeviceData, DirectionLeftRight, InputDirectionUpDown};
 
 
 
@@ -47,20 +47,20 @@ impl InputDevice for NumpadInputDevice {
     }
 
 
-    fn get_current_direction_left_right(&mut self) -> super::input_device::InputDirectionLeftRight {
+    fn get_current_direction_left_right(&self) -> super::input_device::DirectionLeftRight {
 
         if is_key_down(KeyCode::Kp5) && is_key_down(KeyCode::KpAdd) {
-            return InputDirectionLeftRight::Neutral;
+            return DirectionLeftRight::Neutral;
         }
 
         if is_key_down(KeyCode::Kp5) {
-            return InputDirectionLeftRight::Left;
+            return DirectionLeftRight::Left;
         }
         if is_key_down(KeyCode::KpAdd) {
-            return InputDirectionLeftRight::Right;
+            return DirectionLeftRight::Right;
         }
 
-        return InputDirectionLeftRight::Neutral;
+        return DirectionLeftRight::Neutral;
     }
 
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown {

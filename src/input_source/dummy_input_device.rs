@@ -2,7 +2,7 @@ use macroquad::input::{is_key_down, is_key_pressed};
 use std::hash::{Hash, Hasher};
 
 
-use crate::input_source::input_device::{InputDevice, InputDeviceData, InputDirectionLeftRight, InputDirectionUpDown};
+use crate::input_source::input_device::{InputDevice, InputDeviceData, DirectionLeftRight, InputDirectionUpDown};
 
 
 
@@ -55,9 +55,9 @@ impl InputDevice for DummyInputDevice {
 
 
 
-    fn get_current_direction_left_right(&mut self) -> super::input_device::InputDirectionLeftRight {
+    fn get_current_direction_left_right(&self) -> super::input_device::DirectionLeftRight {
 
-        return InputDirectionLeftRight::Neutral;
+        return DirectionLeftRight::Neutral;
     }
 
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown {

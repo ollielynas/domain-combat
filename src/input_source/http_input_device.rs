@@ -5,7 +5,7 @@ use tiny_http::Server;
 
 use crate::input_source::{
     dummy_input_device::dummy_input,
-    input_device::{InputDevice, InputDeviceData, InputDirectionLeftRight, InputDirectionUpDown},
+    input_device::{InputDevice, InputDeviceData, DirectionLeftRight, InputDirectionUpDown},
 };
 
 use std::sync::Mutex;
@@ -326,11 +326,11 @@ impl InputDevice for HttpInputDevice {
         val
     }
 
-    fn get_current_direction_left_right(&mut self) -> InputDirectionLeftRight {
+    fn get_current_direction_left_right(&self) -> DirectionLeftRight {
         match (self.input_button_states.left, self.input_button_states.right) {
-            (true, false) => InputDirectionLeftRight::Left,
-            (false, true) => InputDirectionLeftRight::Right,
-            _ => InputDirectionLeftRight::Neutral,
+            (true, false) => DirectionLeftRight::Left,
+            (false, true) => DirectionLeftRight::Right,
+            _ => DirectionLeftRight::Neutral,
         }
     }
 

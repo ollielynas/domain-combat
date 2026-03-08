@@ -1,9 +1,9 @@
-use std::{thread::sleep, time::Duration};
+use std::{mem, thread::sleep, time::Duration};
 
 use macroquad::{color::ORANGE, models::draw_cylinder, shapes::{draw_circle, draw_circle_lines, draw_rectangle_lines, draw_rectangle_lines_ex}, text::draw_text};
 use rapier2d::{control::*, parry::{query::contact, simba::scalar::SupersetOf}, prelude::{ColliderSet, PhysicsPipeline, RigidBody, RigidBodySet}};
 use rapier2d::prelude::*;
-use crate::{ game::{level::{Level, pick_random_level}, player::Player}, input_source::input_device::{InputDirectionLeftRight, InputDirectionUpDown}};
+use crate::{ animations::animation_manager::AnimationManager, game::{level::{Level, pick_random_level}, player::Player}, input_source::input_device::{DirectionLeftRight, InputDirectionUpDown}};
 use macroquad::prelude::*;
 use crate::consts::*;
 
@@ -91,21 +91,34 @@ impl MatchState {
     }
 
 
+
+
     pub fn render(&mut self) {
 
         self.update_inputs();
 
         self.simulate();
 
+        // how do i evan explne what is going on here? just like trust me bro
+        let mut temp_man = AnimationManager::new();
+        for player in self.players.iter_mut() {
+            mem::swap(&mut temp_man, player.get_animation_manager());
+            temp_man.determine_current_animation(player.get_player_data(), &self.rigid_body_set);
+            mem::swap(&mut temp_man, player.get_animation_manager());
+        }
+
         self.level.render_background();
+
 
         for (i, pl) in self.players.iter_mut().enumerate() {
             pl.render_from_physics(&self.rigid_body_set, i);
         }
 
-        self.level.render_forground();
+        self.level.render_foreground();
 
-        self.render_debug();
+        if is_key_down(KeyCode::Q) {
+            self.render_debug();
+        }
     }
 
 
@@ -173,9 +186,9 @@ impl MatchState {
             let mut inputs_text = inputs.iter().filter(|x| x.1).map(|x| x.0).collect::<Vec<&str>>().join(", ");
 
             inputs_text += match p.get_input_device_mut().get_current_direction_left_right() {
-                InputDirectionLeftRight::Left => "move_left ",
-                InputDirectionLeftRight::Right => "move_right ",
-                InputDirectionLeftRight::Neutral => "",
+                DirectionLeftRight::Left => "move_left ",
+                DirectionLeftRight::Right => "move_right ",
+                DirectionLeftRight::Neutral => "",
             };
             inputs_text += match p.get_input_device_mut().get_current_direction_up_down() {
                 InputDirectionUpDown::Down => "look_down ",

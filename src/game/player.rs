@@ -1,6 +1,6 @@
 use crate::{animations::animation_manager::AnimationManager, input_source::{
     dummy_input_device::dummy_input,
-    input_device::{self, InputDevice, InputDirectionLeftRight},
+    input_device::{self, InputDevice, DirectionLeftRight},
 }};
 use rapier2d::{control::*, na::Isometry};
 use macroquad::text::draw_text;
@@ -90,10 +90,9 @@ pub trait Player {
 
     fn render_sprite_at_pos_with_nametag(&mut self, x: f32, y: f32, scale: f32, player_index: usize) {
         self.render_sprite_at_pos(x, y, scale);
-        // get_text_center(&format!("Player {}", player_index), None, 10.0*scale as u32, 1.0, 0.0);
-        let size = draw_text(&format!("Player {}", player_index), 0.0, 0.0, PLAYER_TEXT_NAME_SIZE*scale, Color { r: 0.0, g: 0.0, b: 0.0, a: 0.0 });
-        draw_text(&format!("Player {}", player_index), x + self.get_width()*scale/2.0 - size.width/2.0, y - size.height * 1.3, PLAYER_TEXT_NAME_SIZE*scale, BLACK);
-        draw_text(&format!("Hp: {}/{}", self.get_current_health_int(), self.get_max_health() as i32), x + self.get_width()*scale/2.0 - size.width/2.0, y - size.height * 0.3, PLAYER_TEXT_NAME_SIZE*scale, RED);
+
+
+
     }
 
 
@@ -133,8 +132,8 @@ pub trait Player {
             if let Some(b) = rigid_body_set.get(h) {
                 let pos = b.position();
                 self.render_sprite_at_pos_with_nametag(
-                    pos.translation.x - self.get_width() * 0.5,
-                    pos.translation.y - self.get_height() * 0.5,
+                    pos.translation.x,
+                    pos.translation.y ,
                     1.0,
                     player_index
                 );
@@ -194,9 +193,9 @@ pub trait Player {
         }
 
         let direction_mod = match self.get_input_device_mut().get_current_direction_left_right() {
-            InputDirectionLeftRight::Left => -1.0,
-            InputDirectionLeftRight::Right => 1.0,
-            InputDirectionLeftRight::Neutral => 0.0,
+            DirectionLeftRight::Left => -1.0,
+            DirectionLeftRight::Right => 1.0,
+            DirectionLeftRight::Neutral => 0.0,
         };
 
         rigid_body.reset_forces(true);

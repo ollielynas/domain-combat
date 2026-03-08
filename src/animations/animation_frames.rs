@@ -12,7 +12,7 @@ pub struct AnimationFrames {
     spritesheet: Image,
     texture: Option<Texture2D>,
     frames: Vec<AniFrame>,
-    frame_map: Vec<usize>
+    frame_map: Vec<usize>,
 }
 
 pub struct AniFrame {
@@ -32,11 +32,14 @@ pub struct AnimationFramesConstructor {
     rel_sclae_height: Vec<f32>,
     /// a multiplier of two would change the time the frame is showen from 1/10th of the whole animation to 2/11, if there were 9 other frames, which all had a multiplier of 1
     frame_time_multiplier: Vec<u8>,
+
+    flip_x: Vec<bool>
+
 }
 
 impl AnimationFramesConstructor {
     pub fn new() -> Self {
-        return AnimationFramesConstructor { frame_time_multiplier: vec![], frames: vec![], offsets: vec![], rel_sclae_height: vec![] }
+        return AnimationFramesConstructor { flip_x:vec![], frame_time_multiplier: vec![], frames: vec![], offsets: vec![], rel_sclae_height: vec![] }
     }
 
     pub fn add_frame(&mut self, bytes: &[u8]) {
@@ -45,6 +48,7 @@ impl AnimationFramesConstructor {
             self.frames.push(img);
             self.offsets.push((0.0,0.0));
             self.rel_sclae_height.push(1.0);
+            self.flip_x.push(false);
             self.frame_time_multiplier.push(1);
         }
     }
@@ -52,6 +56,13 @@ impl AnimationFramesConstructor {
     pub fn change_proportional_frame_time(&mut self, multiplier: u8) {
         if let Some(last_time) =  self.frame_time_multiplier.last_mut() {
             *last_time = multiplier;
+        }
+    }
+
+    /// the char should face right
+    pub fn flip_x(&mut self) {
+        if let Some(x) =  self.flip_x.last_mut() {
+            *x = ! *x;
         }
     }
 
@@ -130,7 +141,7 @@ impl AnimationFramesConstructor {
                 for col in 0..fw {
                     let src_idx = ((row * fw + col) * 4) as usize;
                     let dst_idx = ((row * total_width + cursor_x + col) * 4) as usize;
-                    let pixel = frame.get_pixel(col as u32, row as u32);
+                    let pixel = frame.get_pixel(if self.flip_x[i] {fw-col - 1} else {col} as u32, row as u32);
                     sheet_bytes[dst_idx    ] = (pixel.r * 255.0) as u8;
                     sheet_bytes[dst_idx + 1] = (pixel.g * 255.0) as u8;
                     sheet_bytes[dst_idx + 2] = (pixel.b * 255.0) as u8;
@@ -177,36 +188,42 @@ impl AnimationFramesConstructor {
 }
 
 impl AnimationFrames {
-    pub fn render_frame(&mut self, x: f32, y: f32, time: f32, height: f32) {
-
+    pub fn render_frame(&mut self, x: f32, y: f32, time: f32, height: f32, flip_x: bool) {
         if self.texture.is_none() {
-                self.texture = Some(Texture2D::from_image(&self.spritesheet));
-            }
+            self.texture = Some(Texture2D::from_image(&self.spritesheet));
+        }
         let texture = self.texture.as_ref().unwrap();
 
-        let time = if !self.do_loop {time.min(self.animation_duration)} else {time % self.animation_duration};
-        let frame_index =
-           if self.randomise {
-               *fastrand::choice(self.frame_map.iter()).unwrap() as usize
-           } else {
-           ((time / self.animation_duration * self.frame_map.len() as f32) as usize).clamp(0, self.frame_map.len() - 1)
-           };
-        let frame = &mut self.frames[frame_index];
+        let time = if !self.do_loop {
+            time.min(self.animation_duration)
+        } else {
+            time % self.animation_duration
+        };
 
-        let width = (frame.width as f32 / frame.height as f32) * height;
+        let frame_index = if self.randomise {
+            *fastrand::choice(self.frame_map.iter()).unwrap()
+        } else {
+            ((time / self.animation_duration * self.frame_map.len() as f32) as usize)
+                .clamp(0, self.frame_map.len() - 1)
+        };
 
-        draw_text(&format!("{frame_index}, {:?}", self.anamaiton_state), x, y, DEBUG_TEXT_SIZE, BLACK);
+        let frame = &self.frames[frame_index];
+
+        let draw_height = height * frame.rel_scale_height;
+        let draw_width = (frame.width as f32 / frame.height as f32) * draw_height;
+
+        // Center the sprite on (x, y), then apply offsets
+        let draw_x = x - draw_width  * 0.5 + frame.offset_x * height;
+        let draw_y = y - draw_height * 0.5 + frame.offset_y * height;
 
 
-        draw_texture_ex(texture,  x + frame.offset_x * height, y + frame.offset_y * height, WHITE, DrawTextureParams {
-            dest_size: Some(vec2(width*frame.rel_scale_height, height*frame.rel_scale_height)),
-            // source: None,
+        draw_texture_ex(texture, draw_x, draw_y, WHITE, DrawTextureParams {
+            dest_size: Some(vec2(draw_width, draw_height)),
             source: Some(Rect::new(frame.x as f32, frame.y as f32, frame.width as f32, frame.height as f32)),
             rotation: 0.0,
-            flip_x: false,
+            flip_x,
             flip_y: false,
             pivot: Default::default(),
         });
-
     }
 }

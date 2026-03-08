@@ -13,11 +13,12 @@ impl Default for PeterRabbitPlayer {
 
         let mut idle = AnimationFramesConstructor::new();
         idle.add_frame(include_bytes!(".././../img/PeterRabbit/idle.png"));
-        idle.align_bottom();
-
-        idle.add_frame(include_bytes!(".././../img/PeterRabbit/idle.png"));
         idle.set_scale(1.2);
         idle.align_bottom();
+        idle.flip_x();
+
+
+
 
         ani_m.add_animation(idle.build(true, false, Ani::Idle, 1.0));
 
@@ -51,10 +52,10 @@ impl Player for PeterRabbitPlayer {
     }
 
     fn get_height(&self) -> f32 {
-        40.0
+        80.0
     }
     fn get_width(&self) -> f32 {
-        20.0
+        40.0
     }
 
     fn get_max_health(&self) -> f32 {

@@ -2,7 +2,7 @@ use macroquad::{input::{is_key_down, is_key_pressed}, time::get_fps};
 use std::hash::{Hash, Hasher};
 use midi_msg::{MidiMsg, Channel};
 
-use crate::input_source::input_device::{InputDevice, InputDeviceData, InputDirectionLeftRight, InputDirectionUpDown};
+use crate::input_source::input_device::{InputDevice, InputDeviceData, DirectionLeftRight, InputDirectionUpDown};
 use midir::{Ignore, MidiInput, MidiInputConnection};
 
 
@@ -96,9 +96,9 @@ impl InputDevice for MidiInputDevice {
     }
 
 
-    fn get_current_direction_left_right(&mut self) -> super::input_device::InputDirectionLeftRight {
+    fn get_current_direction_left_right(&self) -> super::input_device::DirectionLeftRight {
 
-        return InputDirectionLeftRight::Neutral;
+        return DirectionLeftRight::Neutral;
     }
 
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown {

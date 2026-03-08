@@ -21,8 +21,8 @@ pub struct PlayerConstructor {
 
 pub fn get_all_player_options() -> Vec<Box<dyn Player>> {
     vec![
-        Box::new(DebugPlayer1::default()),
-            Box::new(DebugPlayer2::default()),
+        // Box::new(DebugPlayer1::default()),
+        // Box::new(DebugPlayer2::default()),
         Box::new(PeterRabbitPlayer::default()),
     ]
 }
@@ -92,7 +92,7 @@ impl PlayerConstructor {
             _ => 1.0
         };
 
-        selected_player.render_sprite_at_pos_with_nametag(left_pos, top_pos - selected_player.get_height() * scale, scale, index + 1);
+        selected_player.render_sprite_at_pos_with_nametag(left_pos + selected_player.get_width() / 2.0 * scale, top_pos - selected_player.get_height() * scale / 2.0, scale, index + 1);
         draw_text(
             &format!(
                 "<- {} ->",
@@ -105,12 +105,16 @@ impl PlayerConstructor {
             20.0,
             BLACK,
         );
+        let select_text = format!(
+            "Select: [{}]",
+
+            self.input_device.get_jump_keybind(),
+        );
         draw_text(
-            &format!(
-                "Ready to play: {} [{}]",
-                self.is_player_ready_to_be_constructed(),
-                self.input_device.get_jump_keybind(),
-            ),
+            if self.is_player_ready_to_be_constructed() {
+                "Ready!"
+            } else {
+            &select_text },
             left_pos,
             top_pos + 50.0,
             20.0,

@@ -7,7 +7,7 @@ use crate::game::levels::{self, debug_level::DebugLevel};
 
 pub trait Level {
     fn render_background(&self);
-    fn render_forground(&self);
+    fn render_foreground(&self);
     /// this funciton should be implemented but not called
     fn genetate_colliders_without_tracking_handles(&self, rigid_body_set: &mut RigidBodySet, collider_set: &mut ColliderSet );
     fn generate_player_foot_pos(&self, number_of_players: usize) -> Vec<(f32,f32)>;

@@ -6,24 +6,19 @@ use std::{
 use crate::input_source::{
     keyboard_input_device::{WasdKeyboardInputDevice, get_all_wasd_keyboards}, midi_input_device::get_midi_inputs, numpad_input_device::{NumpadInputDevice, get_all_numpads}
 };
-
-pub enum InputDirectionLeftRight {
+#[derive(Debug, Eq, PartialEq)]
+pub enum DirectionLeftRight {
     Left,
     Right,
     Neutral,
 }
+#[derive(Debug, Eq, PartialEq)]
 pub enum InputDirectionUpDown {
     Up,
     Down,
     Neutral,
 }
 
-pub enum InputButton {
-    FastAttack,
-    LongAttack,
-    Dash,
-    Jump,
-}
 
 pub struct InputDeviceData {
     pub enabled: bool,
@@ -74,7 +69,7 @@ pub trait InputDevice {
         return self.get_input_device_data_ref().ready_to_play;
     }
 
-    fn get_current_direction_left_right(&mut self) -> InputDirectionLeftRight;
+    fn get_current_direction_left_right(&self) -> DirectionLeftRight;
     fn get_current_direction_up_down(&mut self) -> InputDirectionUpDown;
 
     /// this function only needs to be added to devices which can become disconnected
