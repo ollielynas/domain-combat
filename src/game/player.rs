@@ -1,7 +1,7 @@
-use crate::input_source::{
+use crate::{animations::animation_manager::AnimationManager, input_source::{
     dummy_input_device::dummy_input,
     input_device::{self, InputDevice, InputDirectionLeftRight},
-};
+}};
 use rapier2d::{control::*, na::Isometry};
 use macroquad::text::draw_text;
 use rapier2d::prelude::*;
@@ -42,8 +42,15 @@ impl UniversalPlayerData {
 pub trait Player {
     fn get_player_data(&mut self) -> &mut UniversalPlayerData;
     fn get_player_data_ref(&self) -> &UniversalPlayerData;
+    fn get_animation_manager(&mut self) -> &mut AnimationManager;
+    fn get_animation_manager_ref(&self) -> &AnimationManager;
 
-    fn render_sprite_at_pos(&mut self, x: f32, y: f32, scale: f32);
+
+
+    fn render_sprite_at_pos(&mut self, x: f32, y: f32, scale: f32) {
+        let height =  self.get_height() * scale;
+        self.get_animation_manager().render_aniamiton(x, y, height);
+    }
     fn get_height(&self) -> f32;
     fn get_width(&self) -> f32;
     fn get_name(&mut self) -> String;

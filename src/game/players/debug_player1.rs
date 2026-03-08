@@ -1,12 +1,17 @@
-use crate::game::player::{Player, UniversalPlayerData};
+use crate::{animations::{animation_frames::{AniFrame, AnimationFramesConstructor}, animation_manager::AnimationManager}, game::player::{Player, UniversalPlayerData}};
 
 use macroquad::prelude::*;
 
 pub struct DebugPlayer1 {
     pub data: UniversalPlayerData,
+    pub spritesheet: AnimationManager,
 }
 
-
+impl Default for DebugPlayer1 {
+    fn default() -> Self {
+        Self { data: UniversalPlayerData::dummy(), spritesheet: AnimationManager::new() }
+    }
+}
 
 
 impl Player for DebugPlayer1 {
@@ -15,6 +20,13 @@ impl Player for DebugPlayer1 {
     }
     fn get_player_data_ref(&self) -> &UniversalPlayerData {
         &self.data
+    }
+
+    fn get_animation_manager(&mut self) -> &mut AnimationManager {
+        &mut self.spritesheet
+    }
+    fn get_animation_manager_ref(&self) -> &AnimationManager {
+        &self.spritesheet
     }
 
     fn render_sprite_at_pos(&mut self, x: f32, y:f32, scale:f32) {

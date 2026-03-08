@@ -1,6 +1,6 @@
 use macroquad::{math::Rect, texture::{Image, Texture2D}};
 use macroquad::prelude::*;
-use crate::animations::animation_manager::Ani;
+use crate::{animations::animation_manager::Ani, consts::DEBUG_TEXT_SIZE};
 
 
 
@@ -12,6 +12,7 @@ pub struct AnimationFrames {
     spritesheet: Image,
     texture: Option<Texture2D>,
     frames: Vec<AniFrame>,
+    frame_map: Vec<usize>
 }
 
 pub struct AniFrame {
@@ -22,7 +23,7 @@ pub struct AniFrame {
     offset_x: f32,
     offset_y: f32,
     rel_scale_height: f32,
-    time_multiplier: f32,
+    time_multiplier: u8,
 }
 
 pub struct AnimationFramesConstructor {
@@ -30,7 +31,7 @@ pub struct AnimationFramesConstructor {
     offsets: Vec<(f32,f32)>,
     rel_sclae_height: Vec<f32>,
     /// a multiplier of two would change the time the frame is showen from 1/10th of the whole animation to 2/11, if there were 9 other frames, which all had a multiplier of 1
-    frame_time_multiplier: Vec<f32>,
+    frame_time_multiplier: Vec<u8>,
 }
 
 impl AnimationFramesConstructor {
@@ -44,11 +45,11 @@ impl AnimationFramesConstructor {
             self.frames.push(img);
             self.offsets.push((0.0,0.0));
             self.rel_sclae_height.push(1.0);
-            self.frame_time_multiplier.push(1.0);
+            self.frame_time_multiplier.push(1);
         }
     }
 
-    pub fn change_proportional_frame_time(&mut self, multiplier: f32) {
+    pub fn change_proportional_frame_time(&mut self, multiplier: u8) {
         if let Some(last_time) =  self.frame_time_multiplier.last_mut() {
             *last_time = multiplier;
         }
@@ -110,6 +111,15 @@ impl AnimationFramesConstructor {
         let mut ani_frames: Vec<AniFrame> = Vec::new();
         let mut cursor_x: i32 = 0;
 
+        let mut frame_map = vec![];
+        for (l, dr) in self.frame_time_multiplier.iter().enumerate() {
+            for i in 0_u8..*dr {
+                frame_map.push(l);
+            }
+        }
+
+
+
         for i in 0..self.frames.len() {
             let frame = &self.frames[i];
             let fw = frame.width() as i32;
@@ -160,11 +170,43 @@ impl AnimationFramesConstructor {
             texture: None,
             animation_duration,
             frames: ani_frames,
+            frame_map,
         }
     }
 
 }
 
 impl AnimationFrames {
+    pub fn render_frame(&mut self, x: f32, y: f32, time: f32, height: f32) {
 
+        if self.texture.is_none() {
+                self.texture = Some(Texture2D::from_image(&self.spritesheet));
+            }
+        let texture = self.texture.as_ref().unwrap();
+
+        let time = if !self.do_loop {time.min(self.animation_duration)} else {time % self.animation_duration};
+        let frame_index =
+           if self.randomise {
+               *fastrand::choice(self.frame_map.iter()).unwrap() as usize
+           } else {
+           ((time / self.animation_duration * self.frame_map.len() as f32) as usize).clamp(0, self.frame_map.len() - 1)
+           };
+        let frame = &mut self.frames[frame_index];
+
+        let width = (frame.width as f32 / frame.height as f32) * height;
+
+        draw_text(&format!("{frame_index}, {:?}", self.anamaiton_state), x, y, DEBUG_TEXT_SIZE, BLACK);
+
+
+        draw_texture_ex(texture,  x + frame.offset_x * height, y + frame.offset_y * height, WHITE, DrawTextureParams {
+            dest_size: Some(vec2(width*frame.rel_scale_height, height*frame.rel_scale_height)),
+            // source: None,
+            source: Some(Rect::new(frame.x as f32, frame.y as f32, frame.width as f32, frame.height as f32)),
+            rotation: 0.0,
+            flip_x: false,
+            flip_y: false,
+            pivot: Default::default(),
+        });
+
+    }
 }

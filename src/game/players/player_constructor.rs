@@ -2,6 +2,7 @@ use std::mem::swap;
 
 use macroquad::prelude::*;
 use crate::consts::*;
+use crate::game::players::peter_rabbit_player::PeterRabbitPlayer;
 use crate::{
      game::{
         player::{self, Player, UniversalPlayerData},
@@ -17,20 +18,18 @@ pub struct PlayerConstructor {
     ready_to_construct_player: bool,
 }
 
+
+pub fn get_all_player_options() -> Vec<Box<dyn Player>> {
+    vec![
+        Box::new(DebugPlayer1::default()),
+            Box::new(DebugPlayer2::default()),
+        Box::new(PeterRabbitPlayer::default()),
+    ]
+}
+
 impl PlayerConstructor {
     pub fn new(input_device: Box<dyn InputDevice>, player_index: usize) -> PlayerConstructor {
-        let mut players: Vec<Box<dyn Player>> = vec![];
-
-        let debug_player1 = DebugPlayer1 {
-            data: UniversalPlayerData::dummy(),
-        };
-        let debug_player2 = DebugPlayer2 {
-            data: UniversalPlayerData::dummy(),
-        };
-
-        players.push(Box::new(debug_player1));
-        players.push(Box::new(debug_player2));
-
+        let mut players: Vec<Box<dyn Player>> = get_all_player_options();
         for player in players.iter_mut() {
             player.set_health(player.get_max_health());
         }
